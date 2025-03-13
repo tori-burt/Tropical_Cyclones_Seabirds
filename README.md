@@ -1,7 +1,7 @@
 # Tropical_Cyclones_Seabirds
 Data and code for "Impacts of Tropical Cyclones on Northwest Atlantic Seabirds: Insights from a Category 1 hurricane"
 
-Data availability statement: Data on Leach's Storm-Petrel strandings and deaths from CPAWS-NL and the Rock Wildlife Rescue were provided with written permission from CPAWS-NL. 
+
 
 ### Tori V. Burt
 
@@ -100,3 +100,4 @@ Observations of stranded and dead Leach's Storm-Petrels in eastern Newfoundland 
 #### Data were derived from the following sources
 - Best track data for Atlantic Tropical Cyclones: https://www.nhc.noaa.gov/data/
 - Best track data for Hurricane Larry: https://www.nhc.noaa.gov/data/tcr/index.php?season=2021&basin=atl
+- Data on Leach's Storm-Petrel strandings and deaths from CPAWS-NL and the Rock Wildlife Rescue were provided with written permission from CPAWS-NL. 
