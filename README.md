@@ -103,7 +103,7 @@ Observations of stranded and dead Leach's Storm-Petrels in eastern Newfoundland 
 
 #### Colony_risk_assessment.Rmd 
 - The code required to reproduce Figure 2
-- Iinput files are lesp_noga_large_colonies.csv and NL_hurricanes_cat1_best_tracks.csv
+- Input files are lesp_noga_large_colonies.csv and NL_hurricanes_cat1_best_tracks.csv
 
 #### Hurricane_Larry_colonies.Rmd
 - The code required to reproduce Figure 3
