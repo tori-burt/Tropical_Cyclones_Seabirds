@@ -1,0 +1,131 @@
+---
+title: "Breeding_phenology"
+author: "Tori Burt"
+date: "2025-02-11"
+output: html_document
+---
+
+```{r load packages}
+
+library(ggplot2)
+library(viridis)
+library(tidyverse)
+
+```
+
+```{r load data}
+
+#load data
+seabirds_nl <- read.csv("data/Feb_23_BreedingPhenology_hurricane.csv")
+
+```
+
+```{r clean up data}
+
+#make columns that just contain year, month, and day of year - Lay date start
+seabirds_nl$Lay_start <- as.Date(seabirds_nl$Lay_start)
+seabirds_nl$Lay_Date_st <- as.POSIXlt(seabirds_nl$Lay_start, format = "%m/%d/%Y")
+seabirds_nl$Lay_start <- as.POSIXct(seabirds_nl$Lay_Date_st)
+seabirds_nl$Lay_yDate_start <- yday(seabirds_nl$Lay_Date_st)
+
+#make columns that just contain year, month, and day of year - Lay date end
+seabirds_nl$Lay_end <- as.Date(seabirds_nl$Lay_end)
+seabirds_nl$Lay_date_end <- as.POSIXlt(seabirds_nl$Lay_end, format = "%m/%d/%Y")
+seabirds_nl$Lay_end <- as.POSIXct(seabirds_nl$Lay_date_end)
+seabirds_nl$Lay_yDate_end <- yday(seabirds_nl$Lay_date_end)
+
+#make columns that just contain year, month, and day of year - mean Hatch date
+seabirds_nl$Hatch_date <- as.Date(seabirds_nl$Hatch_date)
+seabirds_nl$Hatch_Date <- as.POSIXlt(seabirds_nl$Hatch_date, format = "%m/%d/%Y")
+seabirds_nl$Hatch_date <- as.POSIXct(seabirds_nl$Hatch_Date)
+seabirds_nl$Hatch_yDate <- yday(seabirds_nl$Hatch_Date)
+
+#make columns that just contain year, month, and day of year - Fledge date early
+seabirds_nl$Fledge_Early <- as.Date(seabirds_nl$Fledge_Early)
+seabirds_nl$Fledge_date_Early <- as.POSIXlt(seabirds_nl$Fledge_Early, format = "%m/%d/%Y")
+seabirds_nl$Fledge_Early <- as.POSIXct(seabirds_nl$Fledge_date_Early)
+seabirds_nl$Fledge_yDate_Early <- yday(seabirds_nl$Fledge_date_Early)
+
+#make columns that just contain year, month, and day of year - Fledge date late
+seabirds_nl$Fledge_Late <- as.Date(seabirds_nl$Fledge_Late)
+seabirds_nl$Fledge_date_Late <- as.POSIXlt(seabirds_nl$Fledge_Late, format = "%m/%d/%Y")
+seabirds_nl$Fledge_Late <- as.POSIXct(seabirds_nl$Fledge_date_Late)
+seabirds_nl$Fledge_yDate_Late <- yday(seabirds_nl$Fledge_date_Late)
+
+#only including colonial nesters w/ > 1,000 breeding pairs
+seabirds_nl_col <- seabirds_nl %>%
+  filter(Species != "NOFU", Species != "MASH", Species != "AHGU", Species != "BLKI", Species != "GBBG")
+
+#make species a factor and define levels
+seabirds_nl_col$Species <- as.factor(seabirds_nl_col$Species)
+levels(seabirds_nl_col$Species) <- c("COMU", "RAZO", "ATPU", "LESP", "NOGA")
+
+#add date for scale for y axis
+seabirds_nl_col <- seabirds_nl_col %>%
+  mutate(yDate=c(100, 125, 225, 300, 325))
+
+```
+
+```{r figure 1}
+
+#Figure 1 - Breeding phenology
+breeding_phen <- ggplot(data = seabirds_nl_col, aes(x = yDate, y = Species)) +
+  geom_segment(aes(x = 146, xend = 201, y = "LESP", yend = "LESP", colour = "Laying"), size = 3) +
+  geom_segment(aes(x = 114, xend = 161, y = "NOGA", yend = "NOGA", colour = "Laying"), size = 3) +
+  geom_segment(aes(x = 129, xend = 160, y = "ATPU", yend = "ATPU", colour = "Laying"), size = 3) + 
+  geom_segment(aes(x = 138, xend = 152, y = "COMU", yend = "COMU", colour = "Laying"), size = 3) +
+  geom_segment(aes(x = 166, xend = 185, y = "RAZO", yend = "RAZO", colour = "Laying"), size = 3) +
+  
+  geom_segment(aes(x = 205, xend = 206, y = "LESP", yend = "LESP", colour = "Mean hatch date"), size = 3) +
+  geom_segment(aes(x = 166, xend = 167, y = "NOGA", yend = "NOGA", colour = "Mean hatch date"), size = 3) +
+  geom_segment(aes(x = 181, xend = 182, y = "ATPU", yend = "ATPU", colour = "Mean hatch date"), size = 3) +
+  geom_segment(aes(x = 181, xend = 182, y = "COMU", yend = "COMU", colour = "Mean hatch date"), size = 3) +
+  geom_segment(aes(x = 199, xend = 200, y = "RAZO", yend = "RAZO", colour = "Mean hatch date"), size = 3) +
+  
+  
+  geom_segment(aes(x = 201, xend = 205, y = "LESP", yend = "LESP", colour = "Incubation/Chick rearing"), size = 3) +
+  geom_segment(aes(x = 206, xend = 253, y = "LESP", yend = "LESP", colour = "Incubation/Chick rearing"), size = 3) +
+  geom_segment(aes(x = 161, xend = 166, y = "NOGA", yend = "NOGA", colour = "Incubation/Chick rearing"), size = 3) +
+  geom_segment(aes(x = 167, xend = 249, y = "NOGA", yend = "NOGA", colour = "Incubation/Chick rearing"), size = 3) +
+  geom_segment(aes(x = 160, xend = 181, y = "ATPU", yend = "ATPU", colour = "Incubation/Chick rearing"), size = 3) +
+  geom_segment(aes(x = 182, xend = 218, y = "ATPU", yend = "ATPU", colour = "Incubation/Chick rearing"), size = 3) +
+  geom_segment(aes(x = 152, xend = 181, y = "COMU", yend = "COMU", colour = "Incubation/Chick rearing"), size = 3) +
+  geom_segment(aes(x = 182, xend = 187, y = "COMU", yend = "COMU", colour = "Incubation/Chick rearing"), size = 3) +
+  geom_segment(aes(x = 185, xend = 199, y = "RAZO", yend = "RAZO", colour = "Incubation/Chick rearing"), size = 3) +
+  geom_segment(aes(x = 200, xend = 217, y = "RAZO", yend = "RAZO", colour = "Incubation/Chick rearing"), size = 3) +
+  
+  geom_segment(aes(x = 253, xend = 311, y = "LESP", yend = "LESP", colour = "Fledging"), size = 3) +
+  geom_segment(aes(x = 249, xend = 308, y = "NOGA", yend = "NOGA", colour = "Fledging"), size = 3) +
+  geom_segment(aes(x = 218, xend = 249, y = "ATPU", yend = "ATPU", colour = "Fledging"), size = 3) + 
+  geom_segment(aes(x = 187, xend = 218, y = "COMU", yend = "COMU", colour = "Fledging"), size = 3) +
+  geom_segment(aes(x = 217, xend = 243, y = "RAZO", yend = "RAZO", colour = "Fledging"), size = 3) +
+  
+  geom_rect(aes(xmin = 266, xmax = 267, ymin = -Inf, ymax = +Inf, fill = " ")) +
+  geom_rect(aes(xmin = 238, xmax = 239, ymin = -Inf, ymax = +Inf, fill = " ")) +
+  geom_rect(aes(xmin = 236, xmax = 237, ymin = -Inf, ymax = +Inf, fill = " ")) +
+  geom_rect(aes(xmin = 251, xmax = 252, ymin = -Inf, ymax = +Inf, fill = " ")) +
+  geom_rect(aes(xmin = 230, xmax = 231, ymin = -Inf, ymax = +Inf, fill = " ")) +
+  geom_rect(aes(xmin = 258, xmax = 259, ymin = -Inf, ymax = +Inf, fill = " ")) +
+  geom_rect(aes(xmin = 288, xmax = 289, ymin = -Inf, ymax = +Inf, fill = " ")) +
+  geom_rect(aes(xmin = 254, xmax = 255, ymin = -Inf, ymax = +Inf, fill = " ")) +
+  geom_rect(aes(xmin = 255, xmax = 256, ymin = -Inf, ymax = +Inf, fill = " ")) +
+  geom_rect(aes(xmin = 264, xmax = 265, ymin = -Inf, ymax = +Inf, fill = " ")) +
+  geom_rect(aes(xmin = 254, xmax = 255, ymin = -Inf, ymax = +Inf, fill = " ")) +
+  scale_colour_manual('Seabird breeding stage', breaks = c("Laying", "Mean hatch date", "Incubation/Chick rearing", "Fledging"),values = c('#414388ff', '#190e19ff', '#3491a8ff', '#7ed7afff'), guide = guide_legend(override.aes = list())) +
+  scale_fill_discrete(labels = c(" "), type = c('grey')) +
+  xlab("Day of year") +
+  labs(fill = "Category 1 hurricane") +
+  scale_x_continuous(limits = c(85, 315), breaks = c(91, 121, 152, 182, 213, 244, 274, 305), labels = c("April 1", "May 1", "June 1", "July 1", "August 1", "September 1", "October 1", "November 1")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+#save figure
+ggsave(breeding_phen, filename = "figures/Breeding_phenology.jpeg", width = 9, height = 5, dpi = 300)
+
+```
+
+```{r viridis color palette}
+
+show_col(viridis_pal(option = "G")(20))
+
+```

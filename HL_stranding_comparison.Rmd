@@ -1,0 +1,69 @@
+---
+title: "HL_stranding_comparison"
+author: "Tori Burt"
+date: "2025-02-17"
+output: html_document
+---
+
+```{r load packages}
+
+library(tidyverse)
+
+```
+
+```{r load data}
+
+HL_lesp_bdv_cpaws <- read.csv("data/HL_Lesp_Bdv_Cpaws_Mar_11_2025.csv") %>%
+  drop_na(Total_lesp)
+
+```
+
+```{r clean up data}
+
+#make columns that just contain year, month, and day of year
+HL_lesp_bdv_cpaws$Date <- as.Date(HL_lesp_bdv_cpaws$Date, format = "%m-%d-%Y")
+HL_lesp_bdv_cpaws$Date <- as.POSIXlt(HL_lesp_bdv_cpaws$Date, format = "%m-%d-%Y")
+HL_lesp_bdv_cpaws$Year <- HL_lesp_bdv_cpaws$Date$year
+HL_lesp_bdv_cpaws$Month <- HL_lesp_bdv_cpaws$Date$mon + 1
+HL_lesp_bdv_cpaws$Date <- as.POSIXct(HL_lesp_bdv_cpaws$Date)
+HL_lesp_bdv_cpaws$yDate <- yday(HL_lesp_bdv_cpaws$Date)
+
+#excluding 2019 - not robust data from BdV
+HL_lesp_bdv_cpaws_20_24 <- HL_lesp_bdv_cpaws %>%
+  filter(Year != "119")
+
+```
+
+```{r LESP counts in each year}
+
+#Total number of lesp in 2020
+sum(HL_lesp_bdv_cpaws_20_24[which(HL_lesp_bdv_cpaws_20_24$Year=='120'), 3]) #2020 - 0 birds
+
+#Total number of lesp in 2021
+sum(HL_lesp_bdv_cpaws_20_24[which(HL_lesp_bdv_cpaws_20_24$Year=='121'), 3]) #2021 - 35 birds
+
+#Total number of lesp in 2022
+sum(HL_lesp_bdv_cpaws_20_24[which(HL_lesp_bdv_cpaws_20_24$Year=='122'), 3]) #2022 - 0 birds
+
+#Total number of lesp in 2023
+sum(HL_lesp_bdv_cpaws_20_24[which(HL_lesp_bdv_cpaws_20_24$Year=='123'), 3]) #2023 - 2 birds
+
+#Total number of lesp in 2024
+sum(HL_lesp_bdv_cpaws_20_24[which(HL_lesp_bdv_cpaws_20_24$Year=='124'), 3]) #2024 - 0 bird
+
+```
+
+```{r figure 6}
+
+LESPstranding_com <- ggplot(HL_lesp_bdv_cpaws_20_24, aes(x = Year, y = Total_lesp)) +
+  geom_col(colour = "#414388FF", fill = "#414388FF") +
+  scale_x_continuous(breaks = c(120, 121, 122, 123, 124), labels = c("2020", "2021", "2022", "2023", "2024")) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  ylab("Number of stranded and dead Leach's Storm-Petrels")
+
+#save figure
+ggsave(LESPstranding_com, filename = "figures/Stranding_comparison.jpeg", width = 8, height = 4, dpi = 350)
+
+```

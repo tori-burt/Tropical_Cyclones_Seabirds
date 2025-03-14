@@ -1,0 +1,176 @@
+---
+title: "LESP_stranding_map"
+author: "Tori Burt"
+date: "2024-11-25"
+output: html_document
+---
+
+```{r load packages}
+
+library(ggplot2)
+library(maps)
+library(ggforce)
+library(RColorBrewer)
+library(viridis)
+library(marmap)
+library(tidyverse)
+library(scales)
+library(stringr)
+library(scales)
+library(legendMap)
+library(ggpubr)
+library(sf)
+library(ggforce)
+library(scales)
+library(patchwork)
+library(ggeffects)
+library(sp)
+library(patchwork)
+library(legendMap)
+library(rlang)
+library(devtools)
+library(usethis)
+library(ggspatial)
+library(cowplot)
+library(rgdal)
+
+```
+
+```{r load data}
+
+#LESP stranding data - CPAWS and Bdv September 10 to 14
+HL_lesp_bdv_cpaws <- read.csv("data/HL_Lesp_Bdv_Cpaws_Mar_11_2025.csv")
+
+#load colony data
+colonies <- read.csv("data/lesp_noga_colonies_large.csv")
+
+#load Hurricane Larry windswath
+larry_wind <- readOGR("data/Hurricane_Larry_Shapefiles/AL122021_windswath.shp") #radii for 34 KT, 50 KT, and 64 KT ref: https://ftp.nhc.noaa.gov/atcf/README
+larry_wind <- fortify(larry_wind)
+
+#load Hurricane Larry best track
+larry_track <- readOGR("data/Hurricane_Larry_Shapefiles/AL122021_lin.shp")
+larry_track <- fortify(larry_track)
+
+#load world map data
+world_map <- map_data("world")
+
+```
+
+```{r clean up data}
+
+#filter for only LESP colonies
+lesp_colonies <- colonies %>%
+  filter(Species == "LESP")
+
+#make columns that just contain year, month, and day of year
+HL_lesp_bdv_cpaws$Date <- as.Date(HL_lesp_bdv_cpaws$Date, format = "%m-%d-%Y")
+HL_lesp_bdv_cpaws$Date <- as.POSIXlt(HL_lesp_bdv_cpaws$Date, format = "%m-%d-%Y")
+HL_lesp_bdv_cpaws$Year <- HL_lesp_bdv_cpaws$Date$year
+HL_lesp_bdv_cpaws$Month <- HL_lesp_bdv_cpaws$Date$mon + 1
+HL_lesp_bdv_cpaws$Date <- as.POSIXct(HL_lesp_bdv_cpaws$Date)
+HL_lesp_bdv_cpaws$yDate <- yday(HL_lesp_bdv_cpaws$Date)
+
+#filter to only include 2021
+HL_lesp_bdv_cpaws_21 <- HL_lesp_bdv_cpaws %>%
+  filter(Year == 121)
+
+#create database with sum of birds per location
+Lat <- aggregate(Lat~Location,HL_lesp_bdv_cpaws_21, max)
+names(Lat)[2] <- 'Lat'
+Lon <- aggregate(Long~Location,HL_lesp_bdv_cpaws_21, max)
+names(Lon)[2] <- 'Long'
+totalnum <- aggregate(Total_lesp~Location,HL_lesp_bdv_cpaws_21,sum)
+names(totalnum)[2] <- 'totalnum'
+df <- merge(totalnum, Lon, by = "Location", all.x = TRUE)
+HL_lesp_bdv_cpaws_21_max <- merge(df, Lat, by = "Location", all.x = TRUE)
+
+#classifying variable
+HL_lesp_bdv_cpaws_21_max$totalnum <- as.numeric(HL_lesp_bdv_cpaws_21_max$totalnum)
+
+#specifying wind swath area
+larry_piece <- larry_wind %>%
+  filter(id != 2, id != 1, id != 3) %>%
+  mutate(Wind_radii = c( "34-50 Knots", "> 50 Knots")[(id %in% c("4") & 
+  as.numeric(as.character(piece)) == 1)+1] )
+
+#subsetting Canada and Newfoundland
+Canada <- subset(world_map, world_map$region == "Canada")
+Newfoundland <- subset(world_map, world_map$subregion == "Newfoundland")
+Fogo <- subset(world_map, world_map$subregion == "Fogo Island")
+
+```
+
+```{r counts of stranding & mortality}
+
+#Total live-stranded and carcasses LESP
+sum(HL_lesp_bdv_cpaws_21$Total_lesp) #35 birds total
+
+#Total live-stranded LESP
+sum(HL_lesp_bdv_cpaws_21$Alive_lesp) #19 birds alive
+
+#Total carcass count LESP
+sum(HL_lesp_bdv_cpaws_21$Dead_lesp) #16 dead
+
+```
+
+```{r figure 5}
+
+#LESP map
+LESPmap <- ggplot()+ 
+  coord_map(xlim = c(-56, -52), ylim = c(46.3, 49)) +
+  xlab("Longitude") +
+  ylab("Latitude") +
+  geom_polygon(data = Newfoundland, aes(x = long, y = lat, group = group), colour = "black", fill = "light grey") +
+  geom_polygon(data = Fogo, aes(x = long, y = lat, group = group), colour = "black", fill = "light grey") +
+  geom_polygon(data = larry_piece, aes(x = long, y = lat, group = group, fill = Wind_radii), alpha = 0.2, colour = "black", linewidth = 0.75) +
+  scale_fill_discrete(labels = c('63-93', '> 93'), type = c('#7ED7AFFF','#414388FF')) +
+  labs(fill = "Wind gusts (km/hr)") +
+  geom_point(data = HL_lesp_bdv_cpaws_21_max, aes(size = totalnum, x = Long, y = Lat), alpha = 0.5, colour = "black", fill = "grey", pch = 16) +
+  labs(size = "Leach's Storm-Petrel stranding or death") +
+   geom_point(data = lesp_colonies,  aes(x = Lon, y = Lat, pch = " "), size = 3, alpha = 0.7, colour = "black") +
+  scale_shape_manual("Leach's Storm-Petrel colony", labels = c(" "), values = c(15)) +
+   geom_path(data = larry_track, aes(x = long, y = lat, colour = " ", group = id), alpha = 1, linewidth = 2) +
+  scale_color_manual(name = "Hurricane Larry track", values = c(" " = "#190E19FF")) +
+  theme(legend.text = element_text(size = 10), legend.key = element_rect(fill ="white"), legend.title = element_text(size = 14), text = element_text(size = 14)) +
+  theme(panel.background = element_rect(fill = 'white', colour = 'black', size = 1)) +
+  scale_bar(lon = -53.5, lat = 46.3, distance_lon = 50, distance_lat = 15, distance_legend = 20, dist_unit = "km", orientation = F) +
+   annotation_north_arrow(location = "tr", which_north = "true",
+  pad_x = unit(0.03, "in"), pad_y = unit(0.1, "in"), height = unit(1.5, "in"), width = unit(1.5, "in"), style =
+  ggspatial::north_arrow_nautical(
+      fill = c("grey40", "white"),
+      line_col = "grey20"))
+
+#bin stranding events
+LESPmap_bin <- LESPmap + 
+  scale_size_binned(breaks=c(1, 5, 10),
+                    labels=c("1", "5", "10"),
+                    limits = c(1, 10))
+
+#Canada sub plot
+CAmap <- ggplot() +
+  coord_map(xlim = c(-60, -51), ylim = c(46, 52)) +
+  xlab("") +
+  ylab("") +
+  geom_polygon(data = Newfoundland, aes(x = long, y = lat, group = group), colour = "black", fill = "light grey") +
+  geom_polygon(data = Fogo, aes(x = long, y = lat, group = group), colour = "black", fill = "light grey") +
+  geom_polygon(data = larry_piece, aes(x = long, y = lat, group = group, fill = Wind_radii), alpha = 0.3, colour = "black", linewidth = 0.75) +
+  scale_fill_discrete(labels = c('63-93', '> 93'), type = c('#7ED7AFFF','#414388FF')) +
+  geom_path(data = larry_track, aes(x = long, y = lat, group = "id"), colour = "black", alpha = 1, linewidth = 2) +
+  geom_rect(aes(xmin = -56, xmax = -52, ymin = 46.3, ymax = 49), alpha = 0, colour = "black") +
+  theme_void() +
+  theme(panel.border = element_rect(fill = NA, colour = "black"), plot.background = element_rect(fill = "white")) +
+  theme(legend.position = "none")
+
+#create inset map
+lespstrand <- ggdraw() +
+  draw_plot(LESPmap_bin) +
+  draw_plot(CAmap,
+    height = 0.34, width = 0.17,
+    x = 0.149,
+    y = 0.652)
+
+#save figure
+ggsave(lespstrand, filename = "figures/LESP_stranding.jpeg", width = 14.5, height = 7.5, dpi = 175)
+
+```

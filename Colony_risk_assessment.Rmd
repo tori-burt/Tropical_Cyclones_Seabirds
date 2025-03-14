@@ -1,0 +1,104 @@
+---
+title: "Colony_risk_assessment"
+author: "Tori Burt"
+date: "2025-02-26"
+output: html_document
+---
+
+```{r load packages}
+
+library(tidyverse)
+library(sf)
+library(sfheaders)
+library(legendMap)
+library(ggspatial)
+library(cowplot)
+library(ggrepel)
+
+```
+
+```{r load data}
+
+#load world map data
+world_map <- map_data("world")
+
+#subset Canada
+Canada <- subset(world_map, world_map$region =="Canada")
+
+#load colony data
+colonies <- read.csv("data/lesp_noga_colonies_large.csv")
+
+#load NL Cat. 1 hurricane tracks
+NL_trk <- read.csv("data/all_hurricanes/NL_hurricanes_cat1_best_tracks.csv", na.strings = "")
+
+```
+
+```{r clean up data}
+
+#transform data into usable format
+NL_trk <- NL_trk %>%
+  mutate(ID = Date, Name = Time, N_rows = Record_identifier) %>%
+  mutate(Date = as.Date(Date, format = "%Y%m%d")) %>%
+  mutate(ID = ifelse(is.na(Date) == T, ID, NA)) %>%
+  mutate(Name = ifelse(is.na(Date) == T, Name, NA)) %>%
+  mutate(N_rows = ifelse(is.na(Date) == T, N_rows, NA)) %>%
+  fill(ID, .direction = "down") %>%
+  fill(Name, .direction = "down") %>%
+  fill(N_rows, .direction = "down") %>%
+  drop_na(Date) %>%
+  mutate(Latitude_hemisphere = str_sub(Latitude, start = -1)) %>%
+  mutate(Longitude_hemisphere = str_sub(Longitude, start = -1)) %>%
+  mutate(Latitude = as.numeric(str_sub(Latitude, end = -2))) %>%
+  mutate(Latitude = ifelse(Latitude_hemisphere == "S", Latitude * -1, Latitude)) %>%
+  mutate(Longitude = as.numeric(str_sub(Longitude, end = -2))) %>%
+  mutate(Longitude = ifelse(Longitude_hemisphere == "W", Longitude * -1, Longitude)) %>%
+  mutate(Time = str_pad(Time, 4, side = "left", pad = "0")) %>%
+  mutate(DateTime = as.POSIXct(paste(Date, Time, sep = " "), format = "%Y-%m-%d %H%M"))
+
+```
+
+```{r figure 2}
+
+#Figure 2 - Colony risk assessment
+HURmap <- ggplot() +
+  scale_y_continuous(expand = c(0,0)) +
+  scale_x_continuous(expand = c(0,0)) +
+  coord_map(xlim = c(-60, -51), ylim = c(46, 52)) +
+  theme(panel.background = element_rect(fill = 'white', colour = 'black'), text = element_text(size = 17)) +
+  geom_polygon(data = Canada, aes(x = long, y = lat, group = group), colour = "black", fill = "light grey") +
+  geom_point(data = colonies, aes(x = Lon, y = Lat, shape = Species), colour = '#190e19ff', size = 4, alpha = 0.6) +
+  geom_path(data = NL_trk, aes(x = Longitude, y = Latitude, group = ID, colour = " "), linewidth = 1, alpha = 0.8) +
+  scale_color_manual(name = "Category 1 hurricane tracks", values = c(" " = "#3491a8ff")) +
+  scale_shape_manual('Species', labels = c("Leach's Storm-Petrel", "Northern Gannet"), values = c(15,16), guide = guide_legend(override.aes = list())) +
+  geom_text_repel(data = colonies[colonies$Breeding_pairs < 1900000,], aes(x = Lon, y = Lat, label = Colony_Name), max.overlaps = 10, min.segment.length = 0.5, nudge_y = 1, nudge_x = -1.2, force = 1.5, force_pull = 1.5) +
+  xlab("Longitude") +
+  ylab("Latitude") +
+  scale_bar(lon = -54, lat = 46.2, distance_lon = 100, distance_lat = 25, distance_legend = 37, dist_unit = "km", orientation = F) +
+annotation_north_arrow(location = "br", which_north = "true", height = unit(3.0, "cm"), width = unit(3.0, "cm"),
+  pad_x = unit(0.05, "in"), pad_y = unit(5.5, "in"), style =
+  ggspatial::north_arrow_nautical(
+      fill = c("grey40", "white"),
+      line_col = "grey20"))
+
+#Canada sub plot
+CAmap <- ggplot() +
+  xlab("") +
+  ylab("") +
+  coord_map() +
+  geom_polygon(data = Canada, aes(x = long, y = lat, group = group), colour = "black", size = 0.1, fill = "light grey") +
+  geom_rect(aes(xmin = -60, xmax = -51, ymin = 46, ymax = 52), alpha = 0, colour = "black") +
+  theme_void() +
+  theme(panel.border = element_rect(fill = NA, colour = "black"), plot.background = element_rect(fill = "white"))
+
+#create inset map
+cat1_hur_trk <- ggdraw() +
+  draw_plot(HURmap) +
+  draw_plot(CAmap,
+    height = 0.25, width = 0.14,
+    x = 0.174,
+    y = 0.74)
+
+#save figure
+ggsave(cat1_hur_trk, filename = "figures/Colony_risk_assessment.jpeg", width = 14.5, height = 7.5, dpi = 175)
+
+```
