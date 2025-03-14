@@ -95,6 +95,32 @@ Observations of stranded and dead Leach's Storm-Petrels in eastern Newfoundland 
 - Source: Data source (CPAWS-NL or Bay de Verde)
 - Notes: Notes about observation
 
+## Code/Software
+
+#### Breeding_phenology.Rmd 
+- The code required to reproduce Figure 1 
+- Input file is Feb_23_BreedingPhenology_hurricane.csv
+
+#### Colony_risk_assessment.Rmd 
+- The code required to reproduce Figure 2
+- Iinput files are lesp_noga_large_colonies.csv and NL_hurricanes_cat1_best_tracks.csv
+
+#### Hurricane_Larry_colonies.Rmd
+- The code required to reproduce Figure 3
+- Input files are lesp_noga_large_colonies.csv and Hurricane Larry "best track" and wind radii (https://www.nhc.noaa.gov/data/tcr/index.php?season=2021&basin=atl).
+
+#### NOGA_stranding_map.Rmd 
+- The code required to reproduce Figure 4
+- Input files are lesp_noga_large_colonies.csv and Gannet_Summary_HL_2024_11_26.csv
+
+#### LESP_stranding_map.Rmd
+- The code required to reproduce Figure 5
+- Input files are lesp_noga_large_colonies.csv and HL_Lesp_Bdv_Cpaws_Feb_24_2025.csv
+
+#### HL_stranding_comparison.Rmd
+- The code required to reproduce Figure 6
+- Input file is HL_Lesp_Bdv_Cpaws_Mar_11_2025.csv
+
 
 ## Sharing/Access Information
 #### Data were derived from the following sources:
