@@ -1,0 +1,9 @@
+Species,BrPairs_NFLD,Lay_start,Lay_mean,Lay_end,Hatch_date,Fledge_Early,Fledge_mean,Fledge_Late,Nest_Type,Ref
+LESP,"2,457,250",26-May,15-June,20-July,24-July,10-Sep,10-Oct,7-Nov,Burrow,"Pollet et al., 2021; COSEWIC, 2020"
+NOGA,"16,651",24-Apr,9-May,10-Jun,15-Jun,6-Sep,20-Sep,4-Nov,Shallow_Cliff/Steep_Cliff,"Mowbray et al., 2020; Kirkham and Montevecchi, 1982; Sceviour et al. 2024"
+BLKI,"54,690",21-May,9-June,29-June,28-Jun,29-Jul,13-Aug,21-Aug,Steep_Cliff,"Cotter et al., 2012; Hatch et al. 2020; Regehr, 1994"
+AHGU,"31,975",10-May,,25-May,27-Jun,4-Aug,,25-Aug,Ground,"Cotter et al., 2012; Weseloh et al. 2024"
+GBBG,"6,870",30-April,12-May,28-May,9-Jun,29-Jul,1-Aug,17-Aug,Ground,"Good, 2020; Langlois Lopez et al. 2023"
+ATPU,"540,000",9-May,20-May,9-June,30-June,6-Aug,19-Aug,6-Sep,Burrow,"CWS, unpubl. Data; Nettleship, 1970;  Iles et al. submitted; Lowther et al., 2020; Wilhelm et al., 2021; Zabala Belenguer, 2023"
+COMU,"755,300",18-May,29-May,1-June,30-June,6-July,20-July,6-August,Steep_Cliff,"Ainley et al., 2020; Mahoney, 1979"
+RAZO,"1,300",15-June,,4-July,18-July,2-Aug,13-Aug,14-Sep,Crevice,"Lavers et al., 2020; Runnells et al., 2024"
