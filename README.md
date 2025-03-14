@@ -95,7 +95,7 @@ Observations of stranded and dead Leach's Storm-Petrels in eastern Newfoundland 
 - Source: Data source (CPAWS-NL or Bay de Verde)
 - Notes: Notes about observation
 
-## Code/Software
+## Code
 
 #### Breeding_phenology.Rmd 
 - The code required to reproduce Figure 1 
