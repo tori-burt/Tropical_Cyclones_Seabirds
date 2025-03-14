@@ -115,7 +115,7 @@ Observations of stranded and dead Leach's Storm-Petrels in eastern Newfoundland 
 
 #### LESP_stranding_map.Rmd
 - The code required to reproduce Figure 5
-- Input files are lesp_noga_large_colonies.csv and HL_Lesp_Bdv_Cpaws_Feb_24_2025.csv
+- Input files are lesp_noga_large_colonies.csv and HL_Lesp_Bdv_Cpaws_Mar_11_2025.csv
 
 #### HL_stranding_comparison.Rmd
 - The code required to reproduce Figure 6
